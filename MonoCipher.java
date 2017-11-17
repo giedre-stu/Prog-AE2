@@ -36,9 +36,7 @@ public class MonoCipher
 		{int searchedValue = alphabet[l]; // searching for a particular char from the alphabet}
 		boolean found=false;  
 		for (int p=0; p<SIZE && !found; p++) 
-				{ 
-				if (searchedValue == cipher[p]) {found = true;}
-				}
+			{ 	if (searchedValue == cipher[p]) {found = true;}		}
 		if (!found) {cipher[i]=(char)searchedValue; i++;}
 		 
 		}//for loop

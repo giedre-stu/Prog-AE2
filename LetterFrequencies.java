@@ -91,7 +91,7 @@ public class LetterFrequencies
 		// create report elements
 		String body = ("");
 		getMaxPC();
-		String title = String.format("%s", "LETTER ANALYSIS");
+		String title = String.format("\n%s", "LETTER ANALYSIS");
 		String topRow = String.format("\n \n%-10s %-10s %-10s %-10s %-10s\n", "Letter", "Freq", "Freq%", "AvgFreq%", "Diff");
 		String maxF = String.format("\n%s %c %s %.1f%s", "The most frequent letter is", maxCh,"at", getMaxPC(), "%");
 		

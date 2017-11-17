@@ -24,8 +24,11 @@ public class CipherGUI extends JFrame implements ActionListener
 	private MonoCipher mcipher;
 	private VCipher vcipher;
 	private LetterFrequencies lfrequencies;
+	private PrintWriter writer;
+	private FileReader reader;
 	
-	private boolean encoded; 
+	private char inType; 
+	private char outType;
 	private boolean vigenere;
 	
 	/**
@@ -86,20 +89,21 @@ public class CipherGUI extends JFrame implements ActionListener
 	 */
 	public void actionPerformed(ActionEvent e)
 	{
-    		if (getKeyword() && processFileName())	{
-		
-	    		if (e.getSource() == monoButton) { 
-	    			mcipher = new MonoCipher(keyword);
-		    		vigenere = false;
-				processFile(vigenere);     		
-	    		} else if (e.getSource() == vigenereButton) {
-	    			vcipher = new VCipher(keyword);
-	    			vigenere = true;
-				processFile(vigenere);
-				} 
-	    		
-	    	}
-	}//method ends
+    		if (getKeyword() && processFileName())	
+    				{ if (e.getSource() == monoButton) 
+		    			{ mcipher = new MonoCipher(keyword);
+				    		vigenere = false;}
+						
+					}    		
+				else if (e.getSource() == vigenereButton) 
+		    			{ vcipher = new VCipher(keyword);
+		    			vigenere = true;
+					} 
+    		
+    		// exits if processing has been successful
+    		if (processFile(vigenere)==true)
+    			{System.exit(0);}	
+	}
 	
 	/** 
 	 * Obtains cipher keyword
@@ -157,30 +161,22 @@ public class CipherGUI extends JFrame implements ActionListener
 		
 		//extracts the message
 		//calls method to determine if file is encoded
+		message = fName.substring(0, LENGTH-1);
 		char fType = fName.charAt(LENGTH-1);
+		if (fType=='P' || fType == 'C') 
+			{inType = fType;
+					switch(fType)
+					{case 'P': outType = 'C';
+					case 'C': outType = 'D';}
+			}
 		
-		if (fType=='P' || fType=='C') {
-				encoded(fType);
-				message = fName.substring(0, LENGTH-1);
-				return true;}
-		
-		// if file name is not valid
 		else
 		{JOptionPane.showMessageDialog(null, "Please enter a valid filename");
 		resetTextFields(message);
 		return false;}
-	}
-	
-	/** helper method
-	* @param last char of the file name
-	* determines if file is encoded
-	*/
-	private void encoded(char fType) 
-	{ 	
-		if (fType == 'P')
-			{encoded=false;}
-		if (fType == 'C')
-			{encoded=true;}
+				
+		message = fName.substring(0, LENGTH-1);
+		return true;
 	}
 	
 	/** 
@@ -192,90 +188,46 @@ public class CipherGUI extends JFrame implements ActionListener
 	 */
 	private boolean processFile(boolean vigenere)
 	{	
-		lfrequencies = new LetterFrequencies();
-		
-	//processes new
-		if (!encoded) 
-			{encode(vigenere);}
-		if (encoded) {
-			decode(vigenere);}
-
-			// prints out report
-			PrintWriter writer;
-					try {
-						writer = new PrintWriter(message+"F.txt");
-					} catch (FileNotFoundException e) {
-						return false; 
-						}
-			
-			System.out.print(lfrequencies.getReport());
-			writer.write(lfrequencies.getReport()); 
-			
-			writer.close();
-				return true;
-	
-	}//processFile method
-	
-	// needs description
-	private boolean encode (boolean vigenere) 
-	{   
-		try {
-			String fileName = (message+"P.txt");
-			FileReader reader = new FileReader(fileName);
-			PrintWriter writer = new PrintWriter(message+"C.txt");
-			
-			for (int next = 0; next >= 0;) 		{
-				next = reader.read();
-				char ch = (char)next;
-				char c = 0;
-			
-					if (!vigenere) {
-						c = mcipher.encode(ch);}
-					if (vigenere)  {
-						c=vcipher.encode(ch);}
+		try 	{  
+			String inName = message + inType + ".txt";
+			reader = new FileReader(inName);
+			writer = new PrintWriter(message + outType + ".txt");
+			lfrequencies = new LetterFrequencies();
+			 
+				for (int next = 0; next >= 0;) {
+						try {next = reader.read();}
+						
+						catch (IOException e) {
+							JOptionPane.showMessageDialog(null,"Problem reading from a file");
+							resetTextFields(message);
+							return false; }
+						
+						char ch = (char)next;
+						char c = 0;
 					
-				lfrequencies.addChar(c);
-				writer.write(String.valueOf(c)); }
-			
-			writer.close();
-			reader.close();
-			return true;
-			}
-		
-		catch(IOException e) {  
-			return false; }  
-	} 
-	
-	// needs description
-	private boolean decode (boolean vigenere) 
-	{	
-	try {
-		String fileName = (message+"C.txt");
-		FileReader reader = new FileReader(fileName);
-		PrintWriter writer = new PrintWriter(message+"D.txt");
-		
-		for (int next = 0; next >= 0;) 		{
-			next = reader.read();
-			char ch = (char)next;
-			char c = 0;
-		
-				if (!vigenere) {
-					c = mcipher.decode(ch);}
-				if (vigenere)  {
-					c = vcipher.decode(ch);}
+							if (!vigenere) {
+								c = mcipher.encode(ch);}
+							// here
+							if (vigenere)  {
+								c = vcipher.encode(ch);}
+
+						lfrequencies.addChar(c);}
 				
-			lfrequencies.addChar(c);
-			writer.write(String.valueOf(c)); }
-		
-		writer.close();
-		reader.close();
-		return true;
-		}
-	
-	catch(IOException e) {
-		return false;}	
-	} 
-	
+					// prints out report
+							try {PrintWriter rWriter = new PrintWriter(message+"F.txt");
+								rWriter.write(lfrequencies.getReport()); 
+								rWriter.close();}
+					
+							finally {JOptionPane.showMessageDialog(null,"File processed successfuly");}
+						return true;
+				} 
+			
+			catch (FileNotFoundException e) {
+				JOptionPane.showMessageDialog(null,"File not found");
+				resetTextFields(message);
+				return false;}
+	}
+
 	private void resetTextFields(String field) {
 		
 		if (field.equals(keyword))

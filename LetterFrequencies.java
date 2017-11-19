@@ -50,14 +50,13 @@ public class LetterFrequencies
 	public void addChar(char ch)
 	{ 	
 		int i = 0;
-		char searchedValue = ch; // searches for the char that was passed to it 
+		char searchedValue = ch; 
 			
 		boolean found=false;  
 			
 		for (i=0; i<25 && !found; i++) 
-				{ 
-				if (searchedValue == alphabet[i]) {
-					found = true;
+				{ if (searchedValue == alphabet[i]) 
+					{ found = true;
 					alphaCounts[i]++;
 					totChars++;
 					}
@@ -88,27 +87,26 @@ public class LetterFrequencies
 	 */
 	public String getReport()
 	{	
-		// create report elements
 		String body = ("");
 		getMaxPC();
-		String title = String.format("\n%s", "LETTER ANALYSIS");
-		String topRow = String.format("\n \n%-10s %-10s %-10s %-10s %-10s\n", "Letter", "Freq", "Freq%", "AvgFreq%", "Diff");
-		String maxF = String.format("\n%s %c %s %.1f%s", "The most frequent letter is", maxCh,"at", getMaxPC(), "%");
+		
+		// create report elements
+		String title = String.format("%s", "LETTER ANALYSIS");
+		String topRow = String.format("\n \n%-10s %-10s %-10s %-10s %-10s\n", 
+				"Letter", "Freq", "Freq%", "AvgFreq%", "Diff");
+		String maxF = String.format("\n%s %c %s %.1f%s", 
+				"The most frequent letter is", maxCh,"at", getMaxPC(), "%");
 		
 		// creates report body
 		for (int i = 0; i < SIZE; i++){
 			double freqPercent = (double)(alphaCounts[i])/(totChars*oneP);
 			double diff = freqPercent-avgCounts[i];
 				
-				//creates body elements A-Z
-				String alphabet = String.format("%-10s ", (char)('A' + i));
-				String frequencies = String.format("%-10d ", alphaCounts[i]);
-				String fPercent = String.format("%-10.1f ", freqPercent);
-				String aCounts = String.format("%-10.1f ", avgCounts[i]);
-				String difference = String.format("%-10.1f \n", diff);
+				//creates a new line
+				String newLine= (String.format("%-10s %-10d %-10.1f %-10.1f %-10.1f \n", 
+						(char)('A' + i), alphaCounts[i], freqPercent, avgCounts[i], diff));
 				
-				// concatenates body String
-				body = body + alphabet + frequencies + fPercent + aCounts + difference;
+				body = body + newLine;
 				}
 		
 		// concatenates & returns report String

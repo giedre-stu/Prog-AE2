@@ -24,13 +24,10 @@ public class CipherGUI extends JFrame implements ActionListener
 	private MonoCipher mcipher;
 	private VCipher vcipher;
 	private LetterFrequencies lfrequencies;
-	private PrintWriter writer;
-	private FileReader reader;
 	
-	private char inType; 
-	private char outType;
-	private boolean vigenere;
-	
+	private char inChar; 
+	private char outChar;
+
 	/**
 	 * The constructor adds all the components to the frame
 	 */
@@ -88,21 +85,30 @@ public class CipherGUI extends JFrame implements ActionListener
 	 * @param e the event
 	 */
 	public void actionPerformed(ActionEvent e)
-	{
-    		if (getKeyword() && processFileName())	
-    				{ if (e.getSource() == monoButton) 
-		    			{ mcipher = new MonoCipher(keyword);
-				    		vigenere = false;}
-						
-					}    		
-				else if (e.getSource() == vigenereButton) 
-		    			{ vcipher = new VCipher(keyword);
-		    			vigenere = true;
-					} 
-    		
-    		// exits if processing has been successful
-    		if (processFile(vigenere)==true)
-    			{System.exit(0);}	
+	{	
+		boolean vigenere; 
+		
+		// if keyword and file name are valid
+		if (getKeyword() && processFileName()) 
+			
+			/**reacts to MonoCipher / Vigenere buttons;
+			creates a new cipher using the entered keyword & processes file;
+			terminates after encryption / decryption is complete*/
+			
+			{ if (e.getSource()==monoButton)	
+		    					{mcipher = new MonoCipher(keyword);
+		    					vigenere = false;
+		    					if (processFile(vigenere))
+			    			 		System.exit(0);
+		   					}		
+		
+			if (e.getSource()==vigenereButton) 
+				    	{vcipher = new VCipher(keyword);
+				    			vigenere = true;
+				    			 	if (processFile(vigenere))
+				    			 		System.exit(0);
+				    			 }
+			}
 	}
 	
 	/** 
@@ -114,36 +120,33 @@ public class CipherGUI extends JFrame implements ActionListener
 	private boolean getKeyword()
 	{ 	
 		keyword = (keyField.getText());
-		int kLength = keyword.length();
-		boolean isValid = false;
+		boolean isValid = true;
 		
-		// checks the validity of each char
-		for (int i=0; i<kLength; i++) {
-			
-			char ch = keyword.charAt(i);
-			
-			// checks if char is unique
-			boolean unique = true;
-			for (int p=0; p<i && unique; p++ ) {  
-					char test = keyword.charAt(p);
-					if (test==ch)
-						unique = false;}
-			
-			// checks if char meets all conditions
-			if (Character.isUpperCase(ch) && unique) {
-				isValid = true;
-				} else {
-					isValid = false;}
-			}//for loop ends
-			
-		// determines the output & return value 
-		if (!isValid) {
-			JOptionPane.showMessageDialog(null, "Please enter a valid keyword");
-			resetTextFields(keyword);
-			return false;
-		} else {
-			return true;}
-		}
+		
+		if (keyword == null || keyword.isEmpty())
+			{isValid = false;} 
+		
+		for (int i=0; i<keyword.length() && isValid; i++)  
+				{char ch = keyword.charAt(i);
+						
+					if (!Character.isUpperCase(ch) || !Character.isLetter(ch)) 
+						{isValid = false;}
+					
+					for (int p=0; p<=i-1 && isValid; p++)
+							{char test = keyword.charAt(p);
+								if (test==ch)
+									isValid = false;
+								} 	
+				}
+					
+		if (!isValid) 
+				{JOptionPane.showMessageDialog(null,	
+							"Please enter a valid keyword");
+				resetTextFields("k");
+				return false;}
+		
+		return true;	
+	}
 	
 	/** 
 	 * Obtains filename from GUI
@@ -157,26 +160,29 @@ public class CipherGUI extends JFrame implements ActionListener
 	private boolean processFileName() 
 	{	
 		String fName = messageField.getText();
-		int LENGTH = fName.length();
 		
 		//extracts the message
-		//calls method to determine if file is encoded
-		message = fName.substring(0, LENGTH-1);
-		char fType = fName.charAt(LENGTH-1);
-		if (fType=='P' || fType == 'C') 
-			{inType = fType;
-					switch(fType)
-					{case 'P': outType = 'C';
-					case 'C': outType = 'D';}
+		if (fName.length()>0)
+			inChar = fName.charAt(fName.length()-1);
+				if (inChar=='P' || inChar == 'C')
+					{switch(inChar)
+						{ case 'P': outChar = 'C';
+							break;
+						case 'C': outChar = 'D';
+							break;
+						}
+						
+					message = fName.substring(0, fName.length()-1);	
+					
+				return true;
 			}
-		
-		else
-		{JOptionPane.showMessageDialog(null, "Please enter a valid filename");
-		resetTextFields(message);
-		return false;}
 				
-		message = fName.substring(0, LENGTH-1);
-		return true;
+		else
+		{JOptionPane.showMessageDialog(null, 
+				"Please enter a valid filename");
+		resetTextFields("m");
+		return false;
+		}
 	}
 	
 	/** 
@@ -188,51 +194,77 @@ public class CipherGUI extends JFrame implements ActionListener
 	 */
 	private boolean processFile(boolean vigenere)
 	{	
-		try 	{  
-			String inName = message + inType + ".txt";
-			reader = new FileReader(inName);
-			writer = new PrintWriter(message + outType + ".txt");
-			lfrequencies = new LetterFrequencies();
+			// String inFile = message + inChar + ".txt";
+			
+			try 
+			{	FileReader reader = new FileReader(message + inChar + ".txt");
+				PrintWriter writer = new PrintWriter(message + outChar + ".txt");
+				lfrequencies = new LetterFrequencies();
 			 
-				for (int next = 0; next >= 0;) {
-						try {next = reader.read();}
-						
-						catch (IOException e) {
-							JOptionPane.showMessageDialog(null,"Problem reading from a file");
-							resetTextFields(message);
-							return false; }
-						
-						char ch = (char)next;
-						char c = 0;
-					
-							if (!vigenere) {
-								c = mcipher.encode(ch);}
-							// here
-							if (vigenere)  {
-								c = vcipher.encode(ch);}
-
-						lfrequencies.addChar(c);}
+				// reads & processes characters 1 by 1
+				for (int next = 0; next >= 0;) 
+					{ 	next = reader.read();
+						char ch = processCharacter((char)next, vigenere);
+						writer.write(String.valueOf(ch));
+					}
+				
+				reader.close();
+				writer.close();
 				
 					// prints out report
-							try {PrintWriter rWriter = new PrintWriter(message+"F.txt");
-								rWriter.write(lfrequencies.getReport()); 
-								rWriter.close();}
-					
-							finally {JOptionPane.showMessageDialog(null,"File processed successfuly");}
-						return true;
-				} 
+						try { PrintWriter rWriter = new PrintWriter(message+"F.txt");
+							rWriter.write(lfrequencies.getReport()); 
+							rWriter.close();
+							}
+						finally 
+						{ JOptionPane.showMessageDialog(null,
+								"File processed successfuly");
+						}			
+			} 	
 			
-			catch (FileNotFoundException e) {
-				JOptionPane.showMessageDialog(null,"File not found");
-				resetTextFields(message);
-				return false;}
+			catch (FileNotFoundException f)  
+			{ JOptionPane.showMessageDialog(null,
+						"File not found");
+			resetTextFields("m");
+			return false; 
+			}
+			
+			catch (IOException e)  
+				{ JOptionPane.showMessageDialog(null,
+						"Unknown problem reading from the file");
+				resetTextFields("m");
+				return false; 
+				}
+			
+			return true;		
 	}
 
-	private void resetTextFields(String field) {
+	private char processCharacter (char ch, boolean vigenere) 
+	{	
+		if (!vigenere) 
+			{ switch (inChar) 
+				{ 	case 'P': ch = mcipher.encode(ch);
+					case 'C': ch = mcipher.decode(ch);
+				}
+			}
+		if (vigenere)  
+			{ switch (inChar) 
+				{ 	case 'P': ch = vcipher.encode(ch);
+					case 'C': ch = vcipher.decode(ch);
+				}
+			}
 		
-		if (field.equals(keyword))
+		lfrequencies.addChar(ch);
+		return ch;
+	}
+	
+	// resets text fields
+	// @param field to reset
+	private void resetTextFields (String field) 
+	
+		{ if (field.equals("k"))
 				{keyField.setText("");}
-		if (field.equals(message))
+		if (field.equals("m"))
 				{messageField.setText("");}
 		} 
 }

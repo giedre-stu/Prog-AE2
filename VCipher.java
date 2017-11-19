@@ -25,13 +25,12 @@ public class VCipher
 			{alphabet[i] = (char)('A' + i);}
 		
 		// create cipher
-	   		
 	   		kLength = keyword.length();
 	   		cipher = new char [kLength][SIZE];
 	   		for (int i = 0; i < kLength; i++) {
 	   			cipher[i][0] = keyword.charAt(i);
 	   			
-	   			//print out the rest of the alphabet
+	   	//print out the rest of the alphabet
 	   				for (int c=1; c<SIZE; c++) {
 	   					if (cipher[i][c-1] == 'Z') {
 	   						cipher [i][c] = 'A'; 
@@ -55,22 +54,16 @@ public class VCipher
 	 */	
 	public char encode(char ch)
 	{	
-		char encoded = ch;
-		boolean found = false;
+		int i = ch-'A';
 		
 		if (r == kLength)
-		{r=0;}
-		
-		for (int c=0; c<SIZE && !found; c++) {
-			if (ch == alphabet[c]){
-				encoded = cipher[r][c];
-				found=true;
+			{r=0;}
+
+		if (i > 0 && i < SIZE-1)
+				ch = cipher[r][i];
 				r++;
-				}
-		
-		}//for loop end
-		
-		return encoded;
+			
+				return ch;
 	}
 	
 	/**

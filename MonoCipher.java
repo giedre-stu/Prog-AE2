@@ -30,16 +30,19 @@ public class MonoCipher
 		for (i=0; i < keyword.length(); i++) 
 		cipher[i] = keyword.charAt(i);
 		
-		// create remainder of cipher from the remaining characters of the alphabet
-		
+		// create remainder of cipher from the remaining characters of the alphabet	
+		// index of
 		for (int l=25; i<SIZE; l--)
-		{int searchedValue = alphabet[l]; // searching for a particular char from the alphabet}
-		boolean found=false;  
-		for (int p=0; p<SIZE && !found; p++) 
-			{ 	if (searchedValue == cipher[p]) {found = true;}		}
-		if (!found) {cipher[i]=(char)searchedValue; i++;}
+			{int searchedValue = alphabet[l]; 
+			boolean found=false;  
+			
+			for (int p=0; p<SIZE && !found; p++) 
+				{ if (searchedValue == cipher[p]) 
+				{found = true;}	
+				}
+			if (!found) {cipher[i]=(char)searchedValue; i++;}
 		 
-		}//for loop
+		}
 		
 		// print cipher array for testing and tutor
 		System.out.print(cipher);
@@ -52,16 +55,10 @@ public class MonoCipher
 	 */
 	public char encode(char ch)
 	{	
-		char encoded = ch;
-		boolean found = false;
-		
-		for (int i=0; i<SIZE && !found; i++) {
-			if (ch == alphabet[i])
-			{ encoded = cipher[i];
-			found=true;}
-		}//for loop end
-		
-		  return encoded;
+		int i = ch-'A';
+		if (i >= 0 && i < SIZE-1)
+			{ch=cipher[i];}
+			return ch;
 	}
 
 	/**
@@ -71,15 +68,10 @@ public class MonoCipher
 	 */
 	public char decode(char ch)
 	{	
-		char decoded = ch; 
-		boolean found = false;
-		
-		for (int i=0; i<SIZE && !found; i++) {
+		for (int i=0; i<SIZE && ch!=cipher[i]; i++) {
 			if (ch == cipher [i])
-			{ decoded = alphabet [i];
-			found=true;}
-		}//for loop end
-		
-	    return decoded;
+			 ch = alphabet[i];}
+	
+		return ch;
 	}
 }
